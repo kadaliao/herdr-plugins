@@ -1,0 +1,40 @@
+id = "kadaliao.space-index"
+name = "Space index"
+description = "Show each Herdr workspace's switch number in the sidebar, so prefix+shift+1..9 has visible targets."
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+platforms = ["linux", "macos"]
+
+# Token metadata is not restored after a server restart, so repopulate it once
+# the server has restored the session and its API socket is ready.
+[[startup]]
+command = ["python3", "sync.py"]
+
+# Numbers are 1-based sidebar positions, so every operation that changes the
+# workspace order has to re-report them.
+[[events]]
+on = "workspace.created"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "workspace.closed"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "workspace.moved"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "workspace.reordered"
+command = ["python3", "sync.py"]
+
+# Manual escape hatch, e.g. bind it with:
+#   [[keys.command]]
+#   key = "prefix+alt+i"
+#   type = "plugin_action"
+#   command = "kadaliao.space-index.refresh"
+[[actions]]
+id = "refresh"
+title = "Refresh workspace numbers"
+contexts = ["workspace"]
+command = ["python3", "sync.py"]
