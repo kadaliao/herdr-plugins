@@ -1,16 +1,18 @@
 # herdr-space-index
 
-**给 Herdr 侧栏的每个 workspace 显示编号** —— 让 `prefix+shift+1..9` 这个「按编号跳转」有了看得见的目标。
+English | [简体中文](README.zh-CN.md)
 
----
+**Show each Herdr workspace's switch number in the sidebar**, so `prefix+shift+1..9` has visible targets.
 
-## 它解决什么问题
+## The problem
 
-Herdr 的 `switch_workspace = "prefix+shift+1..9"` 按**侧栏顺序**跳转，但展开的侧栏里 Space 行只支持
-`state_icon` / `state_text` / `workspace` / `branch` / `git_status` / 自定义 `$token`，**没有内置编号 token**。
-于是你按 `prefix+shift+3` 之前，得自己在心里数一遍。
+Herdr's `switch_workspace = "prefix+shift+1..9"` jumps by **sidebar position**, but an expanded sidebar
+row has no built-in number token: Space rows only support `state_icon`, `state_text`, `workspace`,
+`branch`, `git_status`, and custom `$tokens`. So before pressing `prefix+shift+3` you have to count rows
+yourself.
 
-这个插件把编号作为自定义 token `$idx` 上报，侧栏就能渲染成：
+This plugin reports the number from `herdr workspace list` as a display-only `$idx` token, so a row
+renders as:
 
 ```
  1 ● Douban
@@ -20,18 +22,20 @@ Herdr 的 `switch_workspace = "prefix+shift+1..9"` 按**侧栏顺序**跳转，�
    main
 ```
 
-编号与 `prefix+shift+1..9` 的目标完全一致，也顺便和 `focus_agent = "prefix+alt+1..9"` 的用法凑成一套。
+Those numbers are exactly what `prefix+shift+1..9` targets, matching how
+`focus_agent = "prefix+alt+1..9"` numbers the agent panel.
 
-## 安装
+## Install
 
 ```bash
 herdr plugin install kadaliao/herdr-space-index -y
 ```
 
-然后在 `~/.config/herdr/config.toml` 里给 Space 行加上 `$idx`：
+Then add `$idx` to the Space rows in `~/.config/herdr/config.toml`:
 
 ```toml
-# rows 是「整体替换」而不是追加，所以把默认两行一并写全。
+# `rows` replaces the default layout instead of extending it, so the two
+# default rows are written out in full here.
 [ui.sidebar.spaces]
 row_gap = 0
 rows = [
@@ -40,35 +44,49 @@ rows = [
 ]
 ```
 
-再在 Herdr 里按 `prefix+shift+r`（reload config），或执行 `herdr server reload-config`。
-
-## 工作原理
-
-`sync.py` 执行 `herdr workspace list`，把每个 workspace 的 `number` 用
-`herdr workspace report-metadata <id> --source space-index --token idx=<n>` 写入。
-
-编号是**侧栏位置**，所以凡是会改变顺序的操作都要重新上报：
-
-| 触发时机 | 原因 |
-| --- | --- |
-| `[[startup]]` | token metadata 不会在 server 重启后恢复，必须重新上报 |
-| `workspace.created` / `workspace.closed` | 新增/关闭会改变其后所有编号 |
-| `workspace.moved` / `workspace.reordered` | 拖动排序改变编号 |
-| `refresh` action（可自行绑键） | 手动兜底 |
-
-事件白名单见 Herdr 源码 `src/api/schema/events.rs` 的 `PLUGIN_HOOK_EVENT_KINDS`；这不构成死循环，
-因为 `workspace.metadata_updated` 明确不会触发插件钩子。
-
-手动刷新 / 排查：
+Reload with `prefix+shift+r` (reload config) inside Herdr, or:
 
 ```bash
-# 看会写入什么，不实际写入
-python3 sync.py --dry-run
-herdr workspace list   # 对照 number 字段
-herdr plugin log list  # 看钩子是否执行成功
+herdr server reload-config
 ```
 
-可选：把 refresh action 绑到一个键上：
+## How it works
+
+`sync.py` runs `herdr workspace list` and writes each workspace's `number` with:
+
+```bash
+herdr workspace report-metadata <workspace_id> --source space-index --token idx=<number>
+```
+
+A number is a 1-based sidebar position, so every operation that changes the order has to re-report it:
+
+| Trigger | Why |
+| --- | --- |
+| `[[startup]]` | Token metadata is not restored after a server restart, so it has to be repopulated |
+| `workspace.created` / `workspace.closed` | Creating or closing a workspace renumbers everything after it |
+| `workspace.moved` / `workspace.reordered` | Reordering changes the positions |
+| `refresh` action | Manual escape hatch — see below |
+
+The event whitelist is `PLUGIN_HOOK_EVENT_KINDS` in Herdr's `src/api/schema/events.rs`. This cannot loop
+on itself: `workspace.metadata_updated` never invokes plugin event hooks.
+
+### Manual refresh
+
+```bash
+# Show what would be reported without writing anything
+python3 sync.py --dry-run
+
+# Compare against the authoritative list
+herdr workspace list
+
+# Check whether hooks ran and what they returned
+herdr plugin log list
+
+# Force a refresh through the plugin action
+herdr plugin action invoke kadaliao.space-index.refresh
+```
+
+Optionally bind that action to a key:
 
 ```toml
 [[keys.command]]
@@ -78,44 +96,27 @@ command = "kadaliao.space-index.refresh"
 description = "refresh workspace numbers"
 ```
 
-## 要求与限制
+## Updating
 
-- 需要 `python3` 在 `PATH` 上（插件命令是 argv 数组，不走 shell）。
-- Herdr ≥ 0.9.0（`workspace.report_metadata` 的 token 行为以此版本为准）。
-- 只影响**展开**的桌面侧栏；折叠（compact）与 mobile 视图是 Herdr 原生布局，本来就有编号。
-- 数字靠事件刷新，属于「显示用元数据」，不参与任何语义状态；极端情况下可能滞后一次事件。
-- 超过 9 个 workspace 时编号继续显示,但只有 1–9 有快捷键。
-
-## 卸载
-
-```bash
-herdr plugin uninstall kadaliao.space-index
-# 再把 config.toml 里的 [ui.sidebar.spaces] 段删掉或去掉 "$idx"
-```
-
----
-
-## English
-
-**Show each Herdr workspace's switch number in the sidebar**, so `prefix+shift+1..9` has visible targets.
-
-Herdr's `switch_workspace` indexes workspaces by sidebar position, but the expanded sidebar has no
-built-in number token for Space rows. This plugin reports `herdr workspace list`'s `number` field as a
-display-only `$idx` token, refreshed on `workspace.created` / `closed` / `moved` / `reordered` and once
-per server start.
+Herdr keeps its own managed checkout, so re-run the install command to move to the latest commit:
 
 ```bash
 herdr plugin install kadaliao/herdr-space-index -y
 ```
 
-```toml
-[ui.sidebar.spaces]
-row_gap = 0
-rows = [
-  ["$idx", "state_icon", "workspace"],
-  ["branch", "git_status"],
-]
+## Requirements and limits
+
+- `python3` must be on `PATH` (plugin commands are argv arrays and do not go through a shell).
+- Herdr ≥ 0.9.0, the version this token behavior is written against.
+- Only the **expanded desktop sidebar** is affected. The collapsed compact rail and the mobile layout
+  are Herdr's own and already number workspaces natively.
+- Numbers are display-only metadata refreshed by events, so they can lag behind by at most one event.
+- Beyond 9 workspaces the numbers keep rendering, but only 1–9 have keybindings.
+
+## Uninstall
+
+```bash
+herdr plugin uninstall kadaliao.space-index
 ```
 
-Requires `python3` on `PATH` and Herdr ≥ 0.9.0. Only the expanded desktop sidebar is affected; the
-collapsed compact rail already numbers workspaces natively.
+Then drop the `[ui.sidebar.spaces]` block from `~/.config/herdr/config.toml`, or remove `"$idx"` from it.
