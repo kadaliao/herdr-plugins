@@ -1,0 +1,39 @@
+# kadaliao.status-bar configuration
+#
+# Lives at ~/.config/herdr/plugins/config/kadaliao.status-bar/config.toml
+# (`herdr plugin config-dir kadaliao.status-bar` prints the directory).
+# Every value below is the default; uncomment a line to change it. Changes
+# show up on the next refresh, no reload needed.
+#
+# Templates use Python format syntax: {down:>4} pads to 4 cells so the bar
+# does not jitter, and {name:.20} cuts a text value to 20 terminal cells
+# with "…" (CJK characters count as 2). After editing, run:
+#   ~/.local/state/herdr/plugins/kadaliao.status-bar/bar check
+
+[net]
+# Speed of the interface carrying the default route (a VPN tunnel when one is
+# up). Placeholders: {down} {up} (per second, e.g. 512B 9.9K 85K 1.2M)
+# {interface}
+# format = "↓{down:>4} ↑{up:>4}"
+# "auto" follows the default route; or name one, such as "en0".
+# interface = "auto"
+
+[battery]
+# Hidden on machines without a battery. Placeholders: {percent} {icon}
+# {state} (charging, discharging, or charged) {remaining} ("4:12", or empty
+# while macOS has no estimate).
+# format = "{icon}{percent}%"
+# {icon} for each state; "charged" also covers "on AC, not charging".
+# charging = "⚡"
+# discharging = "🔋"
+# charged = "🔌"
+
+[cpu]
+# Busy share of all cores since the previous refresh. Placeholders: {percent}
+# format = "cpu {percent:>2}%"
+
+[mem]
+# Memory in use; on macOS the same figure as Activity Monitor's "Memory Used"
+# (app memory + wired + compressed). Placeholders: {percent} {used} {total}
+# ({used} and {total} are 1024-based: 32 GB of RAM reads 32G)
+# format = "mem {percent:>2}%"

@@ -2,7 +2,7 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Sidebar plugins for [Herdr](https://herdr.dev). Each plugin lives in its own directory with its own
+Sidebar and tab-bar plugins for [Herdr](https://herdr.dev). Each plugin lives in its own directory with its own
 `herdr-plugin.toml`, so it installs separately and shows up as its own row on the
 [Herdr marketplace](https://herdr.dev/plugins/).
 
@@ -10,6 +10,7 @@ Sidebar plugins for [Herdr](https://herdr.dev). Each plugin lives in its own dir
 | --- | --- | --- |
 | [space-index](space-index/) | Number each workspace in the sidebar so `prefix+shift+1..9` has visible targets | `herdr plugin install kadaliao/herdr-plugins/space-index -y` |
 | [agent-index](agent-index/) | Number each agent in the sidebar so `focus_agent = "prefix+alt+1..9"` has visible targets | `herdr plugin install kadaliao/herdr-plugins/agent-index -y` |
+| [status-bar](status-bar/) | Network speed, battery, CPU, and memory in the tab-bar status area, like a tmux status line | `herdr plugin install kadaliao/herdr-plugins/status-bar -y` |
 
 Each directory's README covers configuration, how it works, and limits. All plugins need Herdr ≥ 0.9.0
 and `python3` on `PATH`.
@@ -32,6 +33,7 @@ herdr plugin install kadaliao/herdr-plugins/space-index -y
 git clone git@github.com:kadaliao/herdr-plugins.git ~/workspace/herdr-plugins
 herdr plugin link ~/workspace/herdr-plugins/space-index
 herdr plugin link ~/workspace/herdr-plugins/agent-index
+herdr plugin link ~/workspace/herdr-plugins/status-bar
 ```
 
 Reinstalling from GitHub replaces the managed checkout, so re-run the install command to update.

@@ -1,0 +1,22 @@
+id = "kadaliao.status-bar"
+name = "Status bar"
+description = "System info for Herdr's tab-bar status area: network speed, battery, CPU, and memory, with configurable templates."
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+platforms = ["linux", "macos"]
+
+# ui.tab_bar_right commands run outside the plugin runtime and cannot see
+# HERDR_PLUGIN_ROOT, so keep a launcher at a stable path in the plugin state
+# directory: ~/.local/state/herdr/plugins/kadaliao.status-bar/bar
+[[startup]]
+command = ["python3", "bar.py", "setup"]
+
+# Startup hooks do not run on install or link, so run this once afterwards:
+#   herdr plugin action invoke kadaliao.status-bar.setup
+# It also writes a commented config.toml into the plugin config directory
+# when there is none yet.
+[[actions]]
+id = "setup"
+title = "Write the status bar launcher and starter config"
+contexts = ["global"]
+command = ["python3", "bar.py", "setup"]

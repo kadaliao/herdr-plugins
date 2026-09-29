@@ -2,13 +2,14 @@
 
 [English](README.md) | 简体中文
 
-[Herdr](https://herdr.dev) 侧栏插件合集。每个插件占一个目录，各自带 `herdr-plugin.toml`，
+[Herdr](https://herdr.dev) 侧栏与 tab 栏插件合集。每个插件占一个目录，各自带 `herdr-plugin.toml`，
 可以单独安装，在 [Herdr 插件市场](https://herdr.dev/plugins/) 里也各自显示为一行。
 
 | 插件 | 作用 | 安装 |
 | --- | --- | --- |
 | [space-index](space-index/) | 给侧栏里的每个 workspace 编号，让 `prefix+shift+1..9` 有看得见的目标 | `herdr plugin install kadaliao/herdr-plugins/space-index -y` |
 | [agent-index](agent-index/) | 给侧栏里的每个 agent 编号，让 `focus_agent = "prefix+alt+1..9"` 有看得见的目标 | `herdr plugin install kadaliao/herdr-plugins/agent-index -y` |
+| [status-bar](status-bar/) | 在 tab 栏右侧状态区显示网速、电量、CPU、内存，类似 tmux 状态栏 | `herdr plugin install kadaliao/herdr-plugins/status-bar -y` |
 
 配置方法、工作原理和限制见各目录的 README。所有插件都需要 Herdr ≥ 0.9.0 和 `PATH` 上的 `python3`。
 
@@ -29,6 +30,7 @@ herdr plugin install kadaliao/herdr-plugins/space-index -y
 git clone git@github.com:kadaliao/herdr-plugins.git ~/workspace/herdr-plugins
 herdr plugin link ~/workspace/herdr-plugins/space-index
 herdr plugin link ~/workspace/herdr-plugins/agent-index
+herdr plugin link ~/workspace/herdr-plugins/status-bar
 ```
 
 从 GitHub 重装会替换 Herdr 托管的副本，所以更新就是重跑安装命令。
