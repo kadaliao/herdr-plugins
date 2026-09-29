@@ -1,6 +1,8 @@
-# herdr-space-index
+# space-index
 
 [English](README.md) | 简体中文
+
+属于 [herdr-plugins](../README.zh-CN.md) 仓库。
 
 **在 Herdr 侧栏的每个 workspace 前面显示切换编号**，让 `prefix+shift+1..9` 有看得见的目标。
 
@@ -26,7 +28,7 @@ Herdr 的 `switch_workspace = "prefix+shift+1..9"` 是按**侧栏顺序**跳转�
 ## 安装
 
 ```bash
-herdr plugin install kadaliao/herdr-space-index -y
+herdr plugin install kadaliao/herdr-plugins/space-index -y
 ```
 
 然后在 `~/.config/herdr/config.toml` 里给 Space 行加上 `$idx`：
@@ -98,7 +100,7 @@ description = "refresh workspace numbers"
 Herdr 自己管理插件副本，所以重跑同一条安装命令即可更新到最新 commit：
 
 ```bash
-herdr plugin install kadaliao/herdr-space-index -y
+herdr plugin install kadaliao/herdr-plugins/space-index -y
 ```
 
 ## 要求与限制

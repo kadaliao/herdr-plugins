@@ -1,6 +1,8 @@
-# herdr-space-index
+# space-index
 
 English | [简体中文](README.zh-CN.md)
+
+Part of [herdr-plugins](../README.md).
 
 **Show each Herdr workspace's switch number in the sidebar**, so `prefix+shift+1..9` has visible targets.
 
@@ -28,7 +30,7 @@ Those numbers are exactly what `prefix+shift+1..9` targets, matching how
 ## Install
 
 ```bash
-herdr plugin install kadaliao/herdr-space-index -y
+herdr plugin install kadaliao/herdr-plugins/space-index -y
 ```
 
 Then add `$idx` to the Space rows in `~/.config/herdr/config.toml`:
@@ -101,7 +103,7 @@ description = "refresh workspace numbers"
 Herdr keeps its own managed checkout, so re-run the install command to move to the latest commit:
 
 ```bash
-herdr plugin install kadaliao/herdr-space-index -y
+herdr plugin install kadaliao/herdr-plugins/space-index -y
 ```
 
 ## Requirements and limits

@@ -1,6 +1,8 @@
-# herdr-agent-index
+# agent-index
 
 English | [简体中文](README.zh-CN.md)
+
+Part of [herdr-plugins](../README.md).
 
 **Show each Herdr agent's panel number in the sidebar**, so `focus_agent = "prefix+alt+1..9"` has
 visible targets.
@@ -25,12 +27,12 @@ renders as:
 ```
 
 Those numbers are exactly what `prefix+alt+1..9` targets — the same idea as the sibling
-[herdr-space-index](https://github.com/kadaliao/herdr-space-index) plugin for workspaces.
+[space-index](../space-index/) plugin for workspaces.
 
 ## Install
 
 ```bash
-herdr plugin install kadaliao/herdr-agent-index -y
+herdr plugin install kadaliao/herdr-plugins/agent-index -y
 ```
 
 Then add `$aidx` to the Agent rows in `~/.config/herdr/config.toml`:
@@ -64,9 +66,9 @@ herdr server reload-config
 ### Local development
 
 ```bash
-herdr plugin link ~/workspace/herdr-agent-index
+herdr plugin link ~/workspace/herdr-plugins/agent-index
 # or, for a checkout anywhere else:
-herdr plugin link /absolute/path/to/herdr-agent-index
+herdr plugin link /absolute/path/to/herdr-plugins/agent-index
 ```
 
 ## How it works
@@ -140,7 +142,7 @@ description = "refresh agent numbers"
 Herdr keeps its own managed checkout, so re-run the install command to move to the latest commit:
 
 ```bash
-herdr plugin install kadaliao/herdr-agent-index -y
+herdr plugin install kadaliao/herdr-plugins/agent-index -y
 ```
 
 ## Requirements and limits

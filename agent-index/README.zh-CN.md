@@ -1,6 +1,8 @@
-# herdr-agent-index
+# agent-index
 
 [English](README.md) | 简体中文
+
+属于 [herdr-plugins](../README.zh-CN.md) 仓库。
 
 **在 Herdr 侧栏的每个 agent 前面显示编号**，让 `focus_agent = "prefix+alt+1..9"` 有看得见的目标。
 
@@ -23,12 +25,12 @@
 ```
 
 编号与 `prefix+alt+1..9` 的目标完全一致——和姊妹项目
-[herdr-space-index](https://github.com/kadaliao/herdr-space-index) 给 workspace 编号是同一套思路。
+[space-index](../space-index/) 给 workspace 编号是同一套思路。
 
 ## 安装
 
 ```bash
-herdr plugin install kadaliao/herdr-agent-index -y
+herdr plugin install kadaliao/herdr-plugins/agent-index -y
 ```
 
 然后在 `~/.config/herdr/config.toml` 里给 Agent 行加上 `$aidx`：
@@ -61,9 +63,9 @@ herdr server reload-config
 ### 本地开发
 
 ```bash
-herdr plugin link ~/workspace/herdr-agent-index
+herdr plugin link ~/workspace/herdr-plugins/agent-index
 # 或者指向任意路径的仓库：
-herdr plugin link /absolute/path/to/herdr-agent-index
+herdr plugin link /absolute/path/to/herdr-plugins/agent-index
 ```
 
 ## 工作原理
@@ -137,7 +139,7 @@ description = "refresh agent numbers"
 Herdr 自己管理插件副本，所以重跑同一条安装命令即可更新到最新 commit：
 
 ```bash
-herdr plugin install kadaliao/herdr-agent-index -y
+herdr plugin install kadaliao/herdr-plugins/agent-index -y
 ```
 
 ## 要求与限制
