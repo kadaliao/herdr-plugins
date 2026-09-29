@@ -1,0 +1,78 @@
+id = "kadaliao.agent-index"
+name = "Agent index"
+description = "Show each Herdr agent's panel number in the sidebar, so focus_agent = prefix+alt+1..9 has visible targets."
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+platforms = ["linux", "macos"]
+
+# Token metadata is not restored after a server restart, so repopulate it once
+# the server has restored the session and its API socket is ready.
+[[startup]]
+command = ["python3", "sync.py"]
+
+# Agent numbers are 1-based panel positions, so every operation that changes
+# the panel order has to re-report them.
+[[events]]
+on = "workspace.created"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "workspace.closed"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "workspace.moved"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "workspace.reordered"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "tab.created"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "tab.closed"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "tab.moved"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "pane.created"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "pane.closed"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "pane.moved"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "pane.exited"
+command = ["python3", "sync.py"]
+
+# An agent appearing or leaving changes every number after it.
+[[events]]
+on = "pane.agent_detected"
+command = ["python3", "sync.py"]
+
+# Only matters while ui.agent_panel_sort = "priority".
+[[events]]
+on = "pane.agent_status_changed"
+command = ["python3", "sync.py"]
+
+# Manual escape hatch, e.g. bind it with:
+#   [[keys.command]]
+#   key = "prefix+alt+i"
+#   type = "plugin_action"
+#   command = "kadaliao.agent-index.refresh"
+[[actions]]
+id = "refresh"
+title = "Refresh agent numbers"
+contexts = ["global"]
+command = ["python3", "sync.py"]
