@@ -1,7 +1,7 @@
 id = "kadaliao.space-index"
 name = "Space index"
 description = "Show each Herdr workspace's switch number in the sidebar, so prefix+shift+1..9 has visible targets."
-version = "0.1.0"
+version = "0.1.1"
 min_herdr_version = "0.9.0"
 platforms = ["linux", "macos"]
 
@@ -28,6 +28,29 @@ command = ["python3", "sync.py"]
 on = "workspace.reordered"
 command = ["python3", "sync.py"]
 
+# When the last workspace closes, Herdr creates a replacement without emitting
+# workspace.created, so nothing above runs for it. Catch it on the next thing
+# that happens there. Numbers already reported are skipped, so these are cheap.
+[[events]]
+on = "workspace.focused"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "tab.created"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "tab.focused"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "pane.created"
+command = ["python3", "sync.py"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["python3", "sync.py"]
+
 # Manual escape hatch, e.g. bind it with:
 #   [[keys.command]]
 #   key = "prefix+alt+i"
@@ -37,4 +60,4 @@ command = ["python3", "sync.py"]
 id = "refresh"
 title = "Refresh workspace numbers"
 contexts = ["workspace"]
-command = ["python3", "sync.py"]
+command = ["python3", "sync.py", "--force"]

@@ -6,8 +6,11 @@ what `switch_workspace = "prefix+shift+1..9"` targets. Reporting it as a token
 lets an expanded sidebar row render the number in front of the workspace name,
 which Herdr has no built-in token for.
 
+Numbers that are already reported correctly are skipped, so running on
+frequent events costs one `herdr workspace list` call.
+
 Usage:
-    python3 sync.py [--dry-run] [--token NAME] [--source ID]
+    python3 sync.py [--dry-run] [--force] [--token NAME] [--source ID]
 
 Herdr injects HERDR_BIN_PATH for plugin commands; without it the `herdr` binary
 on PATH is used.
@@ -31,6 +34,11 @@ def parse_args(argv):
         help="print the reports that would be sent and exit",
     )
     parser.add_argument(
+        "--force",
+        action="store_true",
+        help="re-report numbers that already look correct",
+    )
+    parser.add_argument(
         "--token",
         default=DEFAULT_TOKEN,
         help=f"token name to report (default: {DEFAULT_TOKEN})",
@@ -51,8 +59,8 @@ def run(*args):
     return subprocess.run([herdr_bin(), *args], capture_output=True, text=True)
 
 
-def workspace_numbers():
-    """Return [(workspace_id, number)] in sidebar order."""
+def workspace_numbers(token):
+    """Return [(workspace_id, number, current_token_value)] in sidebar order."""
     listed = run("workspace", "list")
     if listed.returncode != 0:
         raise RuntimeError(listed.stderr.strip() or "herdr workspace list failed")
@@ -65,8 +73,10 @@ def workspace_numbers():
     for workspace in workspaces:
         workspace_id = workspace.get("workspace_id")
         number = workspace.get("number")
+        tokens = workspace.get("tokens")
+        current = tokens.get(token) if isinstance(tokens, dict) else None
         if isinstance(workspace_id, str) and number is not None:
-            numbers.append((workspace_id, number))
+            numbers.append((workspace_id, number, current))
     return numbers
 
 
@@ -74,7 +84,7 @@ def main(argv=None):
     args = parse_args(argv if argv is not None else sys.argv[1:])
 
     try:
-        numbers = workspace_numbers()
+        numbers = workspace_numbers(args.token)
     except RuntimeError as exc:
         print(f"space-index: {exc}", file=sys.stderr)
         return 1
@@ -84,9 +94,11 @@ def main(argv=None):
         return 0
 
     failures = []
-    for workspace_id, number in numbers:
+    for workspace_id, number, current in numbers:
         if args.dry_run:
             print(f"{workspace_id} {args.token}={number}")
+            continue
+        if not args.force and current == str(number):
             continue
         reported = run(
             "workspace",

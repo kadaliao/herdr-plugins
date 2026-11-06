@@ -67,7 +67,11 @@ A number is a 1-based sidebar position, so every operation that changes the orde
 | `[[startup]]` | Token metadata is not restored after a server restart, so it has to be repopulated |
 | `workspace.created` / `workspace.closed` | Creating or closing a workspace renumbers everything after it |
 | `workspace.moved` / `workspace.reordered` | Reordering changes the positions |
+| `workspace.focused`, `tab.created` / `focused`, `pane.created`, `pane.agent_detected` | When the last workspace closes, Herdr opens a replacement without emitting `workspace.created`; this numbers it on the next thing that happens there |
 | `refresh` action | Manual escape hatch — see below |
+
+Numbers that are already reported correctly are skipped, so a run costs one `herdr workspace list`
+call unless something changed.
 
 The event whitelist is `PLUGIN_HOOK_EVENT_KINDS` in Herdr's `src/api/schema/events.rs`. This cannot loop
 on itself: `workspace.metadata_updated` never invokes plugin event hooks.
@@ -114,6 +118,8 @@ herdr plugin install kadaliao/herdr-plugins/space-index -y
   are Herdr's own and already number workspaces natively.
 - Numbers are display-only metadata refreshed by events, so they can lag behind by at most one event.
 - Beyond 9 workspaces the numbers keep rendering, but only 1–9 have keybindings.
+- With saved SSH machines, each machine's workspaces are numbered from 1 under that machine, because
+  `switch_workspace` switches within the machine you are on. Install the plugin on each machine.
 
 ## Uninstall
 

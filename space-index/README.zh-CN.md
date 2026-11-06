@@ -64,7 +64,10 @@ herdr workspace report-metadata <workspace_id> --source space-index --token idx=
 | `[[startup]]` | token metadata 不会在 server 重启后恢复，必须重新上报 |
 | `workspace.created` / `workspace.closed` | 新增或关闭会改变其后所有编号 |
 | `workspace.moved` / `workspace.reordered` | 拖动排序改变位置 |
+| `workspace.focused`、`tab.created` / `focused`、`pane.created`、`pane.agent_detected` | 最后一个 workspace 关闭后，Herdr 会补开一个新的，但不发 `workspace.created`；靠它之后发生的下一件事给它编号 |
 | `refresh` action | 手动兜底，见下 |
+
+已经正确上报的编号会跳过，所以没有变化时每次只花一次 `herdr workspace list` 调用。
 
 事件白名单见 Herdr 源码 `src/api/schema/events.rs` 的 `PLUGIN_HOOK_EVENT_KINDS`。这不会造成死循环：
 `workspace.metadata_updated` 明确不会触发插件事件钩子。
@@ -110,6 +113,8 @@ herdr plugin install kadaliao/herdr-plugins/space-index -y
 - 只影响**展开**的桌面侧栏；折叠的 compact 栏和 mobile 布局是 Herdr 原生布局，本来就有编号。
 - 编号是靠事件刷新的显示用元数据，最多滞后一次事件。
 - 超过 9 个 workspace 时编号继续显示，但只有 1–9 有快捷键。
+- 添加了 SSH 机器时，每台机器下的 workspace 各自从 1 编号，因为 `switch_workspace` 只在当前所在的
+  机器内切换。每台机器都要装本插件。
 
 ## 卸载
 
