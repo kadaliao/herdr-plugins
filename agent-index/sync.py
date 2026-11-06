@@ -59,6 +59,15 @@ RENUMBER_ACTION = "kadaliao.agent-index.renumber"
 # Herdr token keys are 1-32 characters of [A-Za-z0-9_-]; leave room for the
 # "-base" suffix so a window's base can be stored under a related key.
 TOKEN_NAME = re.compile(r"^[A-Za-z0-9_-]{1,27}$")
+
+
+def window_token(name):
+    """Whether `name` can be another window's agent token.
+
+    space-index stores its own `idx…-base` tokens on the same workspaces, so
+    only `aidx…` names count here.
+    """
+    return bool(TOKEN_NAME.match(name)) and name.startswith(DEFAULT_TOKEN)
 # Herdr accepts at most 16 tokens in one metadata report.
 MAX_TOKENS_PER_REPORT = 16
 
@@ -290,7 +299,7 @@ def stored_bases(workspaces):
             token = key[: -len(BASE_SUFFIX)]
             if (
                 key.endswith(BASE_SUFFIX)
-                and TOKEN_NAME.match(token)
+                and window_token(token)
                 and isinstance(value, str)
                 and value.isdigit()
             ):
@@ -310,7 +319,7 @@ def window_bases(own_token, sort, is_hub, dry_run):
     saved = {
         token: base
         for token, base in load_state("bases.json").items()
-        if TOKEN_NAME.match(token) and isinstance(base, int) and base >= 0
+        if window_token(token) and isinstance(base, int) and base >= 0
     }
     bases = {**saved, **stored_bases(list_workspaces())}
     if bases != saved and not dry_run:

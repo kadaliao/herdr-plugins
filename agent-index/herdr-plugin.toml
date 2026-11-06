@@ -1,7 +1,7 @@
 id = "kadaliao.agent-index"
 name = "Agent index"
 description = "Show each Herdr agent's panel number in the sidebar, so focus_agent = prefix+alt+1..9 has visible targets, across saved machines too."
-version = "0.2.0"
+version = "0.2.1"
 min_herdr_version = "0.9.0"
 platforms = ["linux", "macos"]
 
