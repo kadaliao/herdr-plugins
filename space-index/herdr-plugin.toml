@@ -1,7 +1,7 @@
 id = "kadaliao.space-index"
 name = "Space index"
-description = "Show each Herdr workspace's switch number in the sidebar, so prefix+shift+1..9 has visible targets."
-version = "0.1.1"
+description = "Show each Herdr workspace's switch number in the sidebar, so prefix+shift+1..9 has visible targets, continuing across saved machines."
+version = "0.2.0"
 min_herdr_version = "0.9.0"
 platforms = ["linux", "macos"]
 
@@ -51,7 +51,8 @@ command = ["python3", "sync.py"]
 on = "pane.agent_detected"
 command = ["python3", "sync.py"]
 
-# Manual escape hatch, e.g. bind it with:
+# Manual escape hatch: re-reports every number and re-sends every saved
+# machine its base. Bind it with, e.g.:
 #   [[keys.command]]
 #   key = "prefix+alt+i"
 #   type = "plugin_action"
@@ -61,3 +62,13 @@ id = "refresh"
 title = "Refresh workspace numbers"
 contexts = ["workspace"]
 command = ["python3", "sync.py", "--force"]
+
+# Invoked over `herdr --machine` by a host that saved this machine, after it
+# stores where this machine's workspaces start in its window. Only renumbers
+# this server's workspaces, so two hosts that save each other never call back
+# and forth.
+[[actions]]
+id = "renumber"
+title = "Renumber this machine's workspaces"
+contexts = ["global"]
+command = ["python3", "sync.py", "--local-only"]

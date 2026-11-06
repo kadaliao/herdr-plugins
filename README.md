@@ -8,7 +8,7 @@ Sidebar and tab-bar plugins for [Herdr](https://herdr.dev). Each plugin lives in
 
 | Plugin | What it does | Install |
 | --- | --- | --- |
-| [space-index](space-index/) | Number each workspace in the sidebar so `prefix+shift+1..9` has visible targets | `herdr plugin install kadaliao/herdr-plugins/space-index -y` |
+| [space-index](space-index/) | Number each workspace in the sidebar so `prefix+shift+1..9` has visible targets, continuing across saved machines | `herdr plugin install kadaliao/herdr-plugins/space-index -y` |
 | [agent-index](agent-index/) | Number each agent in the sidebar so `focus_agent = "prefix+alt+1..9"` has visible targets, continuing across saved machines | `herdr plugin install kadaliao/herdr-plugins/agent-index -y` |
 | [status-bar](status-bar/) | Network speed, battery, CPU, and memory in the tab-bar status area, like a tmux status line | `herdr plugin install kadaliao/herdr-plugins/status-bar -y` |
 

@@ -25,7 +25,8 @@ renders as:
 ```
 
 Those numbers are exactly what `prefix+shift+1..9` targets, matching how
-`focus_agent = "prefix+alt+1..9"` numbers the agent panel.
+`focus_agent = "prefix+alt+1..9"` numbers the agent panel. With saved SSH machines, the numbers
+continue down the sidebar across machines — see [Across machines](#across-machines).
 
 ## Install
 
@@ -69,12 +70,39 @@ A number is a 1-based sidebar position, so every operation that changes the orde
 | `workspace.moved` / `workspace.reordered` | Reordering changes the positions |
 | `workspace.focused`, `tab.created` / `focused`, `pane.created`, `pane.agent_detected` | When the last workspace closes, Herdr opens a replacement without emitting `workspace.created`; this numbers it on the next thing that happens there |
 | `refresh` action | Manual escape hatch — see below |
+| `renumber` action | Invoked over `herdr --machine` by a host that saved this machine |
 
 Numbers that are already reported correctly are skipped, so a run costs one `herdr workspace list`
 call unless something changed.
 
 The event whitelist is `PLUGIN_HOOK_EVENT_KINDS` in Herdr's `src/api/schema/events.rs`. This cannot loop
 on itself: `workspace.metadata_updated` never invokes plugin event hooks.
+
+### Across machines
+
+With [saved SSH machines](https://herdr.dev/docs/connecting-machines/), a window lists Local's
+workspaces first, then each enabled machine's in `herdr machine list` order, and the numbers continue
+down that list:
+
+```
+▾ Local
+  1 ● Douban
+  2 ● Desktop
+▾ workbox
+  3 ● api
+```
+
+`switch_workspace` only switches within the machine you are on, so `prefix+shift+3` above does not
+reach `api`: a saved machine's numbers mark its place in the window. Reach other machines with
+`next_workspace` / `previous_workspace`, which do cross machines in sidebar order, or `prefix+w`.
+
+It works like [agent-index](../agent-index/#across-machines): install the plugin on every machine. A host
+with saved machines stores how many workspaces its window lists before each of them (the workspace
+token `<token>-base`) and invokes that machine's `renumber` action; each server then reports one number
+per window that shows its workspaces. **Two hosts that save each other** list machines in opposite
+orders, so give each host's space rows its own token name (`$idx_laptop`, `$idx_server`); the plugin
+reads the first `$idx…` token from the host's config. If both still render the same token, each keeps
+its own window right and logs a warning.
 
 ### Manual refresh
 
@@ -88,7 +116,8 @@ herdr workspace list
 # Check whether hooks ran and what they returned
 herdr plugin log list
 
-# Force a refresh through the plugin action
+# Force a refresh through the plugin action: re-reports every number and
+# re-sends every saved machine its base
 herdr plugin action invoke kadaliao.space-index.refresh
 ```
 
@@ -118,8 +147,11 @@ herdr plugin install kadaliao/herdr-plugins/space-index -y
   are Herdr's own and already number workspaces natively.
 - Numbers are display-only metadata refreshed by events, so they can lag behind by at most one event.
 - Beyond 9 workspaces the numbers keep rendering, but only 1–9 have keybindings.
-- With saved SSH machines, each machine's workspaces are numbered from 1 under that machine, because
-  `switch_workspace` switches within the machine you are on. Install the plugin on each machine.
+- Python 3.11+ reads the `$idx…` token name from your config; older versions fall back to `idx`.
+- Cross-machine numbers need this plugin, 0.2.0 or later, on every machine. A window skips machines it
+  cannot reach, and so does the numbering; a host retries an unreachable machine after a minute.
+- With two or more saved machines, a change in one machine's workspace count reaches the machines
+  listed after it only at the host's next change or `refresh`.
 
 ## Uninstall
 

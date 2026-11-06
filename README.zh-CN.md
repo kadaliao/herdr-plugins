@@ -7,7 +7,7 @@
 
 | 插件 | 作用 | 安装 |
 | --- | --- | --- |
-| [space-index](space-index/) | 给侧栏里的每个 workspace 编号，让 `prefix+shift+1..9` 有看得见的目标 | `herdr plugin install kadaliao/herdr-plugins/space-index -y` |
+| [space-index](space-index/) | 给侧栏里的每个 workspace 编号，让 `prefix+shift+1..9` 有看得见的目标，跨已添加的机器连续编号 | `herdr plugin install kadaliao/herdr-plugins/space-index -y` |
 | [agent-index](agent-index/) | 给侧栏里的每个 agent 编号，让 `focus_agent = "prefix+alt+1..9"` 有看得见的目标，跨已添加的机器连续编号 | `herdr plugin install kadaliao/herdr-plugins/agent-index -y` |
 | [status-bar](status-bar/) | 在 tab 栏右侧状态区显示网速、电量、CPU、内存，类似 tmux 状态栏 | `herdr plugin install kadaliao/herdr-plugins/status-bar -y` |
 
