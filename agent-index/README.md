@@ -5,7 +5,8 @@ English | [简体中文](README.zh-CN.md)
 Part of [herdr-plugins](../README.md).
 
 **Show each Herdr agent's panel number in the sidebar**, so `focus_agent = "prefix+alt+1..9"` has
-visible targets.
+visible targets. With saved SSH machines, the numbers continue across machines the way `focus_agent`
+counts them.
 
 ## The problem
 
@@ -91,6 +92,7 @@ numbers the list as-is and re-reports whenever that order can change:
 | `pane.agent_detected` | An agent appearing or leaving shifts every number after it |
 | `pane.agent_status_changed` | Only changes the order while `ui.agent_panel_sort = "priority"` |
 | `refresh` action | Manual escape hatch — see below |
+| `renumber` action | Invoked over `herdr --machine` by a host that saved this machine — see [Across machines](#across-machines) |
 
 The event whitelist is `PLUGIN_HOOK_EVENT_KINDS` in Herdr's `src/api/schema/events.rs`. This cannot
 loop on itself: metadata reports do not emit plugin event hooks.
@@ -111,6 +113,48 @@ Override the detection when you need to:
 python3 sync.py --sort priority --dry-run
 ```
 
+### Across machines
+
+With [saved SSH machines](https://herdr.dev/docs/connecting-machines/), a window lists Local's agents
+first, then each enabled machine's agents in `herdr machine list` order, and `focus_agent` counts
+through that combined list. Install the plugin on every machine and the numbers continue across them:
+
+```
+ 1 ● Local · Research  claude
+ 2 ● Local · Desktop   claude
+ 3 ● workbox · api     pi
+```
+
+Each server numbers its own agents. A host with saved machines also stores, on each of them, how many
+agents its window lists before that machine — as the workspace token `<token>-base` — and invokes that
+machine's `renumber` action. The machine then reports `<token> = base + position` on its agent panes
+and keeps doing so on its own events, so an agent starting there is numbered without any round trip.
+A base is re-sent only when it changes (and re-checked at most every 10 minutes), and the machine keeps
+it in its plugin state directory, so it survives a server restart.
+
+**Two hosts that save each other** list agents in opposite orders, but every window renders the same
+pane tokens. Give each host's agent rows its own token name; the plugin reads the first `$aidx…` token
+from the host's config and reports one number for every window that shows an agent:
+
+```toml
+# laptop: ~/.config/herdr/config.toml        # server: ~/.config/herdr/config.toml
+["$aidx_laptop", "state_icon", "machine"]     ["$aidx_server", "state_icon", "machine"]
+```
+
+If you share one config between machines (chezmoi and the like), template that token name per host.
+If both hosts still render the same token, each keeps its own window right — local agents from 1 —
+and logs a warning.
+
+Limits:
+
+- Only with `ui.agent_panel_sort = "spaces"`. Priority order interleaves every machine's agents by
+  client-side recency, which no server can see, so with `priority` each server numbers its own agents
+  from 1.
+- A window skips machines it cannot reach, and so does the numbering. A host retries an unreachable
+  machine after a minute.
+- With two or more saved machines, a change in one machine's agent count reaches the machines listed
+  after it only at the host's next change or `refresh`.
+
 ### Manual refresh
 
 ```bash
@@ -123,8 +167,12 @@ herdr agent list
 # Check whether hooks ran and what they returned
 herdr plugin log list
 
-# Force a refresh through the plugin action
+# Force a refresh through the plugin action: re-reports every number and
+# re-sends every saved machine its base
 herdr plugin action invoke kadaliao.agent-index.refresh
+
+# What a saved machine reports
+herdr --machine <label> agent list
 ```
 
 Optionally bind that action to a key:
@@ -148,7 +196,9 @@ herdr plugin install kadaliao/herdr-plugins/agent-index -y
 ## Requirements and limits
 
 - `python3` must be on `PATH` (plugin commands are argv arrays and do not go through a shell).
-  Python 3.11+ reads `ui.agent_panel_sort` from your config; older versions fall back to `spaces`.
+  Python 3.11+ reads `ui.agent_panel_sort` and the `$aidx…` token name from your config; older
+  versions fall back to `spaces` and `aidx`.
+- Cross-machine numbers need this plugin, 0.2.0 or later, on every machine.
 - Herdr ≥ 0.9.0, the version this token behavior is written against.
 - Only the **expanded desktop sidebar** is affected. The collapsed compact rail and the mobile layout
   keep Herdr's own compact Agent rows.
@@ -164,4 +214,5 @@ herdr plugin uninstall kadaliao.agent-index
 # linked locally instead? herdr plugin unlink kadaliao.agent-index
 ```
 
-Then drop `[ui.sidebar.agents]` from `~/.config/herdr/config.toml`, or just remove `"$aidx"` from it.
+Then drop `[ui.sidebar.agents]` from `~/.config/herdr/config.toml`, or just remove the `$aidx…` token
+from it.
